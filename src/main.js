@@ -24,7 +24,8 @@ let totalPages = 0;
 async function onSearchFormSubmit(event) {
   event.preventDefault();
   searchQuery = event.target.elements.searchKeyword.value.trim();
-
+  page = 1;
+  loadMoreBtn.classList.add('is-hidden');
   if (searchQuery === '') {
     galleryEl.innerHTML = '';
     event.target.reset();
@@ -45,7 +46,6 @@ async function onSearchFormSubmit(event) {
   try {
     const imagesData = await fetchPhotosByQuery(searchQuery, page);
 
-    lightbox.refresh();
     if (!imagesData.hits || imagesData.hits.length === 0) {
       iziToast.show({
         title: '✖',
@@ -59,7 +59,7 @@ async function onSearchFormSubmit(event) {
       'beforeend',
       createGalleryItemMarkup(imagesData.hits)
     );
-
+    lightbox.refresh();
     totalPages = Math.ceil(imagesData.totalHits / PER_PAGE);
     loadMoreBtn.classList.remove('is-hidden');
     if (totalPages <= 1) {
@@ -75,17 +75,18 @@ async function onSearchFormSubmit(event) {
 
 async function addPage(event) {
   page += 1;
+
   const imagesData = await fetchPhotosByQuery(searchQuery, page);
 
   galleryEl.insertAdjacentHTML(
     'beforeend',
     createGalleryItemMarkup(imagesData.hits)
   );
-
   lightbox.refresh();
 
-  if (page >= imagesData.totalHits) {
+  if (page * PER_PAGE >= imagesData.totalHits || imagesData.hits.length === 0) {
     loadMoreBtn.classList.add('is-hidden');
+
     iziToast.info({
       message: "We're sorry, but you've reached the end of search results.",
       position: 'topRight',
@@ -93,14 +94,14 @@ async function addPage(event) {
     smoothScroll();
   }
 }
-function smoothScroll() {
-  const lastArticle = containerEl.querySelector('.gallery-img');
-  const newsArticleHeight = lastArticle.getBoundingClientRect().height;
-  const scrollHeight = newsArticleHeight * 2;
-  console.log(scrollHeight);
 
-  window.scrollBy({
-    top: newsArticleHeight,
+function smoothScroll() {
+  const lastArticle = document.querySelector('.gallery-item');
+  const newsArticleHeight = lastArticle.getBoundingClientRect().height;
+  const scrollHeight = window.scrollY + newsArticleHeight;
+
+  window.scrollTo({
+    top: scrollHeight,
     left: 0,
     behavior: 'smooth',
   });

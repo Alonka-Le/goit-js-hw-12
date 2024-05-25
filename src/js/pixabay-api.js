@@ -17,10 +17,6 @@ export const fetchPhotosByQuery = (query, page = 1) => {
   });
 
   return axios.get(`?${searchParams.toString()}`).then(response => {
-    if (response.status !== 200) {
-      throw new Error(response.statusText);
-    }
-
     return response.data;
   });
 };
