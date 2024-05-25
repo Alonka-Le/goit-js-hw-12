@@ -115,3 +115,10 @@
   letter-spacing: 0.04em;
   color: #fff;
 }
+.btn-load-more {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}

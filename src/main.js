@@ -35,6 +35,7 @@ async function onSearchFormSubmit(event) {
       backgroundColor: 'red',
       position: 'topRight',
     });
+
     return;
   }
 
@@ -54,13 +55,15 @@ async function onSearchFormSubmit(event) {
         position: 'topRight',
       });
     }
-
-    galleryEl.innerHTML = createGalleryItemMarkup(imagesData.hits);
+    galleryEl.insertAdjacentHTML(
+      'beforeend',
+      createGalleryItemMarkup(imagesData.hits)
+    );
 
     totalPages = Math.ceil(imagesData.totalHits / PER_PAGE);
-
-    if (totalPages > 1) {
-      loadMoreBtn.classList.remove('is-hidden');
+    loadMoreBtn.classList.remove('is-hidden');
+    if (totalPages <= 1) {
+      loadMoreBtn.classList.add('is-hidden');
     }
   } catch (error) {
     console.log(error);
@@ -69,12 +72,39 @@ async function onSearchFormSubmit(event) {
   event.target.reset();
   loaderEl.classList.add('is-hidden');
 }
+
 async function addPage(event) {
+  page += 1;
   const imagesData = await fetchPhotosByQuery(searchQuery, page);
 
-  galleryEl.innerHTML = createGalleryItemMarkup(imagesData.hits);
-  page += 1;
+  galleryEl.insertAdjacentHTML(
+    'beforeend',
+    createGalleryItemMarkup(imagesData.hits)
+  );
+
   lightbox.refresh();
+
+  if (page >= imagesData.totalHits) {
+    loadMoreBtn.classList.add('is-hidden');
+    iziToast.info({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'topRight',
+    });
+    smoothScroll();
+  }
 }
+function smoothScroll() {
+  const lastArticle = containerEl.querySelector('.gallery-img');
+  const newsArticleHeight = lastArticle.getBoundingClientRect().height;
+  const scrollHeight = newsArticleHeight * 2;
+  console.log(scrollHeight);
+
+  window.scrollBy({
+    top: newsArticleHeight,
+    left: 0,
+    behavior: 'smooth',
+  });
+}
+
 searchFormEl.addEventListener('submit', onSearchFormSubmit);
 loadMoreBtn.addEventListener('click', addPage);
