@@ -96,13 +96,11 @@ async function addPage(event) {
 }
 
 function smoothScroll() {
-  const lastArticle = document.querySelector('.gallery-item');
-  const newsArticleHeight = lastArticle.getBoundingClientRect().height;
-  const scrollHeight = window.scrollY + newsArticleHeight;
-
-  window.scrollTo({
-    top: scrollHeight,
-    left: 0,
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+  window.scrollBy({
+    top: cardHeight * 2,
     behavior: 'smooth',
   });
 }
